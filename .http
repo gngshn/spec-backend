@@ -1,4 +1,4 @@
-@host=http://localhost:8080/api/v1/admin
+@host=http://localhost:8080/api/v1/admin/generic
 
 ###
 POST {{host}}/chips
@@ -9,18 +9,18 @@ POST {{host}}/chips
 }
 
 ###
-GET {{host}}/chips?skip=20
+GET {{host}}/chips
 
 ###
-GET {{host}}/chips/60376c3724e1f8664ee5d106
+GET {{host}}/chips/603521341c09f0d94a1878c6
 
 ###
-PUT {{host}}/chips/60376c3724e1f8664ee5d106
+PUT {{host}}/chips/603521341c09f0d94a1878c6
 
 {
   "name": "RTS3917",
-  "description": "Realtek HDR IPCam111111"
+  "description": "Realtek HDR IPCam222"
 }
 
 ###
-DELETE {{host}}/chips/60376c3724e1f8664ee5d106
+DELETE {{host}}/chips/603521341c09f0d94a1878c6

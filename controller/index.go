@@ -6,5 +6,5 @@ import (
 
 func AddController(e *echo.Echo) {
 	admin := e.Group("/api/v1/admin")
-	addChips(admin)
+	addResources(admin)
 }
