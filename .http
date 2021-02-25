@@ -24,3 +24,35 @@ PUT {{host}}/chips/603521341c09f0d94a1878c6
 
 ###
 DELETE {{host}}/chips/603521341c09f0d94a1878c6
+
+
+
+
+
+
+###
+POST {{host}}/mods
+
+{
+  "name": "HEVC",
+  "description": "HEVC",
+  "ic": "6037a1ac666eb2a67fdd1091"
+}
+
+###
+GET {{host}}/mods?ic=6037a1ac666eb2a67fdd1091
+
+###
+GET {{host}}/mods/6037b21bd80cbfa8314bddc2
+
+###
+PUT {{host}}/mods/6037b21bd80cbfa8314bddc2
+
+{
+  "name": "ISP",
+  "description": "Image Signal Processor",
+  "ic": "6037a58ae4dca45a332930b4"
+}
+
+###
+DELETE {{host}}/mods/603521341c09f0d94a1878c6

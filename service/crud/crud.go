@@ -20,16 +20,16 @@ func Create(crud model.Crud) error {
 	return nil
 }
 
-func Count(crud model.Crud) int64 {
-	count, err := crud.GetColl().Find(ctx, bson.M{}).Count()
+func Count(crud model.Crud, filter bson.M) int64 {
+	count, err := crud.GetColl().Find(ctx, filter).Count()
 	if err != nil {
 		return 0
 	}
 	return count
 }
 
-func FindSome(crud model.Crud, skip int64, limit int64, data interface{}) error {
-	err := crud.GetColl().Find(ctx, bson.M{}).Skip(skip).Limit(limit).All(data)
+func FindSome(crud model.Crud, skip int64, limit int64, filter bson.M, data interface{}) error {
+	err := crud.GetColl().Find(ctx, filter).Skip(skip).Limit(limit).All(data)
 	if err != nil {
 		return err
 	}

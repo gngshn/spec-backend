@@ -8,6 +8,7 @@ import (
 	"github.com/gngshn/spec-backend/service/crud"
 	"github.com/jinzhu/inflection"
 	"github.com/labstack/echo/v4"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -38,6 +39,12 @@ func findSomeResources(c echo.Context) error {
 	if limit > 100 || limit == 0 {
 		limit = 100
 	}
+	filter := bson.M{}
+	ic, err := primitive.ObjectIDFromHex(c.QueryParam(("ic")))
+	if err == nil {
+		filter["ic"] = ic
+	}
+
 	resource, err := model.CreateCrud(getRes(c))
 	if err != nil {
 		return err
@@ -46,11 +53,11 @@ func findSomeResources(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	total := crud.Count(resource)
+	total := crud.Count(resource, filter)
 	if skip >= total {
 		return c.JSON(http.StatusOK, createPagination(total, skip, limit, resources))
 	}
-	err = crud.FindSome(resource, skip, limit, &resources)
+	err = crud.FindSome(resource, skip, limit, filter, &resources)
 	if err != nil {
 		return err
 	}
@@ -107,7 +114,6 @@ func deleteOneResource(c echo.Context) error {
 	resource.SetID(id)
 	err = crud.DeleteOne(resource)
 	if err != nil {
-		println("error occurred")
 		return err
 	}
 	return c.JSONBlob(http.StatusOK, []byte(`{"status": "success"}`))
