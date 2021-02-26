@@ -34,15 +34,30 @@ func createResource(c echo.Context) error {
 }
 
 func findSomeResources(c echo.Context) error {
-	skip, _ := strconv.ParseInt(c.QueryParam("skip"), 0, 64)
-	limit, _ := strconv.ParseInt(c.QueryParam("limit"), 0, 64)
-	if limit > 100 || limit == 0 {
-		limit = 100
-	}
+	var skip int64 = 0
+	var limit int64 = 0
 	filter := bson.M{}
-	ic, err := primitive.ObjectIDFromHex(c.QueryParam(("ic")))
-	if err == nil {
-		filter["ic"] = ic
+	for k, v := range c.QueryParams() {
+		switch k {
+		case "skip":
+			skip, _ = strconv.ParseInt(c.QueryParam(k), 0, 64)
+		case "limit":
+			limit, _ = strconv.ParseInt(c.QueryParam(k), 0, 64)
+			if limit > 1000 || limit == 0 {
+				limit = 1000
+			}
+		default:
+			fid, err := primitive.ObjectIDFromHex(v[0])
+			if err == nil {
+				if fid == primitive.NilObjectID {
+					filter[k] = bson.M{"$exists": false}
+				} else {
+					filter[k] = fid
+				}
+			} else {
+				filter[k] = v[0]
+			}
+		}
 	}
 
 	resource, err := model.CreateCrud(getRes(c))

@@ -9,7 +9,7 @@ POST {{host}}/chips
 }
 
 ###
-GET {{host}}/chips
+GET {{host}}/chips?skip=0&limit=10
 
 ###
 GET {{host}}/chips/603521341c09f0d94a1878c6
@@ -36,11 +36,11 @@ POST {{host}}/mods
 {
   "name": "HEVC",
   "description": "HEVC",
-  "ic": "6037a1ac666eb2a67fdd1091"
+  "chip": "6037a1ac666eb2a67fdd1091"
 }
 
 ###
-GET {{host}}/mods?ic=6037a1ac666eb2a67fdd1091
+GET {{host}}/mods?chip=6037a1ac666eb2a67fdd1091
 
 ###
 GET {{host}}/mods/6037b21bd80cbfa8314bddc2
