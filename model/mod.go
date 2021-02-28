@@ -10,7 +10,7 @@ type Mod struct {
 	ID          primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 	Name        string             `json:"name" bson:"name"`
 	Description string             `json:"description" bson:"description"`
-	RegOffset   string             `json:"regOffset" bson:"regOffset"`
+	RegOffset   uint32             `json:"regOffset" bson:"regOffset"`
 	Chip        primitive.ObjectID `json:"chip" bson:"chip"`
 	Parent      primitive.ObjectID `json:"parent,omitempty" bson:"parent,omitempty"`
 }

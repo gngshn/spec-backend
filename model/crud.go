@@ -19,6 +19,8 @@ func CreateCrud(name string) (Crud, error) {
 		return new(Chip), nil
 	case "mod":
 		return new(Mod), nil
+	case "register":
+		return new(Register), nil
 	default:
 		return nil, errors.New("No such model exist")
 	}
@@ -30,6 +32,8 @@ func CreateCruds(name string) (interface{}, error) {
 		return []Chip{}, nil
 	case "mod":
 		return []Mod{}, nil
+	case "register":
+		return []Register{}, nil
 	default:
 		return nil, errors.New("No such model exist")
 	}

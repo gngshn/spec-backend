@@ -56,3 +56,35 @@ PUT {{host}}/mods/6037b21bd80cbfa8314bddc2
 
 ###
 DELETE {{host}}/mods/603521341c09f0d94a1878c6
+
+
+###
+POST {{host}}/registers
+
+{
+  "name": "CROP_START",
+  "description": "crop start point",
+  "offset": 0,
+  "parent": "603521341c09f0d94a1878c6",
+  "fields": [
+    {
+      "msb": 11,
+      "lsb": 0,
+      "name": "crop_x",
+      "description": "crop start x",
+      "access": "RW",
+      "Reset": 0
+    },
+    {
+      "msb": 27,
+      "lsb": 16,
+      "name": "crop_y",
+      "description": "crop start y",
+      "access": "RW",
+      "Reset": 0
+    }
+  ]
+}
+
+###
+GET {{host}}/registers

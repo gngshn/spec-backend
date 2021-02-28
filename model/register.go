@@ -1,20 +1,36 @@
 package model
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"github.com/gngshn/spec-backend/model/dao"
+	"github.com/qiniu/qmgo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type RegField struct {
-	Msb         string `json:"msb" bson:"msb"`
-	Lsb         string `json:"lsb" bson:"lsb"`
-	Name        string `json:"name" bson:"name"`
-	Description string `json:"description" bson:"description"`
-	Access      string `json:"access" bson:"access"`
-	Reset       string `json:"reset" bson:"reset"`
+	Bits        [2]uint8 `json:"bits" bson:"bits"`
+	Name        string   `json:"name" bson:"name"`
+	Description string   `json:"description" bson:"description"`
+	Access      string   `json:"access" bson:"access"`
+	Reset       string   `json:"reset" bson:"reset"`
 }
 
 type Register struct {
 	ID          primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 	Name        string             `json:"name" bson:"name"`
 	Description string             `json:"description" bson:"description"`
-	Offset      string             `json:"offset" bson:"offset"`
-	Fields      []RegField         `json:"field" bson:"field"`
+	Offset      uint32             `json:"offset" bson:"offset"`
+	Parent      primitive.ObjectID `json:"parent" bson:"parent"`
+	Fields      []RegField         `json:"fields" bson:"fields"`
+}
+
+func (register *Register) GetColl() *qmgo.Collection {
+	return dao.GetDB().Collection("registers")
+}
+
+func (register *Register) GetID() primitive.ObjectID {
+	return register.ID
+}
+
+func (register *Register) SetID(id primitive.ObjectID) {
+	register.ID = id
 }
