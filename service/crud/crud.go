@@ -9,6 +9,7 @@ import (
 )
 
 var ctx context.Context = context.Background()
+var Ctx = ctx
 
 func Create(crud model.Crud) error {
 	crud.SetID(primitive.NilObjectID)
