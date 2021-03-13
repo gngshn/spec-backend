@@ -26,3 +26,7 @@ func (mod *Mod) GetID() primitive.ObjectID {
 func (mod *Mod) SetID(id primitive.ObjectID) {
 	mod.ID = id
 }
+
+func (mod *Mod) CheckRefine(_ bool) error {
+	return nil
+}

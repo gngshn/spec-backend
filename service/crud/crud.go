@@ -29,8 +29,8 @@ func Count(crud model.Crud, filter bson.M) int64 {
 	return count
 }
 
-func FindSome(crud model.Crud, skip int64, limit int64, filter bson.M, data interface{}) error {
-	err := crud.GetColl().Find(ctx, filter).Skip(skip).Limit(limit).All(data)
+func FindSome(crud model.Crud, filter bson.M, sort []string, skip int64, limit int64, data interface{}) error {
+	err := crud.GetColl().Find(ctx, filter).Sort(sort...).Skip(skip).Limit(limit).All(data)
 	if err != nil {
 		return err
 	}

@@ -34,3 +34,7 @@ func (register *Register) GetID() primitive.ObjectID {
 func (register *Register) SetID(id primitive.ObjectID) {
 	register.ID = id
 }
+
+func (register *Register) CheckRefine(_ bool) error {
+	return nil
+}

@@ -12,8 +12,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const defaultPassword = "123456"
-
 /* need move to config */
 var Secret = []byte("sl-dkfj#$sd#$jfs43#$#")
 
@@ -35,7 +33,11 @@ func GetLoginToken(user *model.User) (string, error) {
 		if user.Username != "admin" {
 			return "", echo.NewHTTPError(http.StatusBadRequest, "Username or password is incorrent")
 		}
-		err = CreateUser(user)
+		err = user.CheckRefine(false)
+		if err != nil {
+			return "", echo.NewHTTPError(http.StatusBadRequest, "Username or password check fail")
+		}
+		err = crud.Create(user)
 		if err != nil {
 			return "", echo.NewHTTPError(http.StatusInternalServerError, "Login fail")
 		}
@@ -43,12 +45,12 @@ func GetLoginToken(user *model.User) (string, error) {
 	} else {
 		user.NeedChangePassword = userFind.NeedChangePassword
 	}
-	if user.NeedChangePassword {
-		return "", nil
-	}
 	err = bcrypt.CompareHashAndPassword([]byte(userFind.Password), []byte(user.RealPassword))
 	if err != nil {
 		return "", echo.NewHTTPError(http.StatusBadRequest, "Username or password is incorrent")
+	}
+	if user.NeedChangePassword {
+		return "", nil
 	}
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
@@ -60,57 +62,29 @@ func GetLoginToken(user *model.User) (string, error) {
 }
 
 func ChangePassword(changePasswordDto *model.ChangePasswordDto) error {
-	userFind := new(model.User)
-	err := userFind.GetColl().Find(crud.Ctx, bson.M{"username": changePasswordDto.Username}).One(userFind)
+	if changePasswordDto.NewPassword == changePasswordDto.OldPassword {
+		return echo.NewHTTPError(http.StatusBadRequest, "Please use a new password")
+	}
+	user := new(model.User)
+	err := user.GetColl().Find(crud.Ctx, bson.M{"username": changePasswordDto.Username}).One(user)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Username or password is error")
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(userFind.Password), []byte(changePasswordDto.OldPassword))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(changePasswordDto.OldPassword))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Username or password is error")
 	}
-	userFind.Password, err = bcrypt.GenerateFromPassword([]byte(changePasswordDto.NewPassword), bcrypt.DefaultCost)
+	user.RealPassword = changePasswordDto.NewPassword
+	user.Password, err = bcrypt.GenerateFromPassword([]byte(user.RealPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "update password fail")
 	}
-	if userFind.RealPassword == defaultPassword {
-		userFind.NeedChangePassword = true
+	if user.RealPassword == model.DefaultPassword {
+		user.NeedChangePassword = true
 	} else {
-		userFind.NeedChangePassword = false
+		user.NeedChangePassword = false
 	}
-	crud.UpdateOne(userFind)
+	crud.UpdateOne(user)
 
 	return nil
-}
-
-func CreateUser(user *model.User) error {
-	if user.Username == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Username can not be empty")
-	}
-	userFind := new(model.User)
-	err := user.GetColl().Find(crud.Ctx, bson.M{"username": user.Username}).One(userFind)
-	if err == nil {
-		return echo.NewHTTPError(http.StatusConflict, "Username has been exist")
-	}
-	user.Password, err = bcrypt.GenerateFromPassword([]byte(user.RealPassword), bcrypt.DefaultCost)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Create user fail")
-	}
-	if user.RealPassword == defaultPassword {
-		user.NeedChangePassword = true
-	}
-	if user.Username == "admin" {
-		user.Admin = true
-	} else {
-		user.Admin = false
-	}
-
-	return crud.Create(user)
-}
-
-func UpdateOneUser(user *model.User) error {
-	if user.RealPassword != defaultPassword {
-		user.NeedChangePassword = true
-	}
-	return crud.UpdateOne(user)
 }

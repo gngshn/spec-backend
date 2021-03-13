@@ -23,3 +23,7 @@ func (chip *Chip) GetID() primitive.ObjectID {
 func (chip *Chip) SetID(id primitive.ObjectID) {
 	chip.ID = id
 }
+
+func (chip *Chip) CheckRefine(_ bool) error {
+	return nil
+}

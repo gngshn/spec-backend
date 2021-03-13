@@ -12,17 +12,16 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func getRes(c echo.Context) string {
-	resources := c.Param("resources")
-	return inflection.Singular(resources)
-}
-
-func createResource(c echo.Context) error {
-	resource, err := model.CreateCrud(getRes(c))
+func create(c echo.Context, res string) error {
+	resource, err := model.CreateCrud(res)
 	if err != nil {
 		return err
 	}
 	err = c.Bind(resource)
+	if err != nil {
+		return err
+	}
+	err = resource.CheckRefine(true)
 	if err != nil {
 		return err
 	}
@@ -31,21 +30,25 @@ func createResource(c echo.Context) error {
 		return err
 	}
 	return c.JSON(http.StatusCreated, resource)
+
 }
 
-func findSomeResources(c echo.Context) error {
+func findSome(c echo.Context, res string) error {
+	filter := bson.M{}
+	var sort = []string{}
 	var skip int64 = 0
 	var limit int64 = 0
-	filter := bson.M{}
 	for k, v := range c.QueryParams() {
 		switch k {
-		case "skip":
+		case "$skip":
 			skip, _ = strconv.ParseInt(c.QueryParam(k), 0, 64)
-		case "limit":
+		case "$limit":
 			limit, _ = strconv.ParseInt(c.QueryParam(k), 0, 64)
 			if limit > 1000 || limit == 0 {
 				limit = 1000
 			}
+		case "$sort":
+			sort = append(sort, c.QueryParam(k))
 		default:
 			fid, err := primitive.ObjectIDFromHex(v[0])
 			if err == nil {
@@ -59,12 +62,11 @@ func findSomeResources(c echo.Context) error {
 			}
 		}
 	}
-
-	resource, err := model.CreateCrud(getRes(c))
+	resource, err := model.CreateCrud(res)
 	if err != nil {
 		return err
 	}
-	resources, err := model.CreateCruds(getRes(c))
+	resources, err := model.CreateCruds(res)
 	if err != nil {
 		return err
 	}
@@ -72,19 +74,20 @@ func findSomeResources(c echo.Context) error {
 	if skip >= total {
 		return c.JSON(http.StatusOK, createPagination(total, skip, limit, resources))
 	}
-	err = crud.FindSome(resource, skip, limit, filter, &resources)
+	err = crud.FindSome(resource, filter, sort, skip, limit, &resources)
 	if err != nil {
 		return err
 	}
 	return c.JSON(http.StatusOK, createPagination(total, skip, limit, resources))
 }
 
-func findOneResource(c echo.Context) error {
+func findOne(c echo.Context, res string) error {
+
 	id, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
 		return err
 	}
-	resource, err := model.CreateCrud(getRes(c))
+	resource, err := model.CreateCrud(res)
 	if err != nil {
 		return err
 	}
@@ -96,16 +99,20 @@ func findOneResource(c echo.Context) error {
 	return c.JSON(http.StatusOK, resource)
 }
 
-func updateOneResource(c echo.Context) error {
+func updateOne(c echo.Context, res string) error {
 	id, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
 		return err
 	}
-	resource, err := model.CreateCrud(getRes(c))
+	resource, err := model.CreateCrud(res)
 	if err != nil {
 		return err
 	}
 	err = c.Bind(resource)
+	if err != nil {
+		return err
+	}
+	err = resource.CheckRefine(false)
 	if err != nil {
 		return err
 	}
@@ -117,12 +124,12 @@ func updateOneResource(c echo.Context) error {
 	return c.JSON(http.StatusOK, resource)
 }
 
-func deleteOneResource(c echo.Context) error {
+func deleteOne(c echo.Context, res string) error {
 	id, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
 		return err
 	}
-	resource, err := model.CreateCrud(getRes(c))
+	resource, err := model.CreateCrud(res)
 	if err != nil {
 		return err
 	}
@@ -132,6 +139,31 @@ func deleteOneResource(c echo.Context) error {
 		return err
 	}
 	return c.JSONBlob(http.StatusOK, []byte(`{"status": "success"}`))
+}
+
+func getRes(c echo.Context) string {
+	resources := c.Param("resources")
+	return inflection.Singular(resources)
+}
+
+func createResource(c echo.Context) error {
+	return create(c, getRes(c))
+}
+
+func findSomeResources(c echo.Context) error {
+	return findSome(c, getRes(c))
+}
+
+func findOneResource(c echo.Context) error {
+	return findOne(c, getRes((c)))
+}
+
+func updateOneResource(c echo.Context) error {
+	return updateOne(c, getRes(c))
+}
+
+func deleteOneResource(c echo.Context) error {
+	return deleteOne(c, getRes(c))
 }
 
 func addResources(g *echo.Group) {

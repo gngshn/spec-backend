@@ -47,37 +47,23 @@ func changePassword(c echo.Context) error {
 }
 
 func createUser(c echo.Context) error {
-	user := new(model.User)
-	err := c.Bind(user)
-	if err != nil {
-		return err
-	}
-	err = service.CreateUser(user)
-	if err != nil {
-		return err
-	}
-	return c.JSON(http.StatusCreated, user)
+	return create(c, "user")
 }
 
 func findSomeUsers(c echo.Context) error {
-	users := []model.User{}
-	return c.JSON(http.StatusOK, users)
+	return findSome(c, "user")
 }
 
 func findOneUser(c echo.Context) error {
-	user := new(model.User)
-	return c.JSON(http.StatusOK, user)
+	return findOne(c, "user")
 }
 
 func updateOneUser(c echo.Context) error {
-	user := new(model.User)
-	return c.JSON(http.StatusOK, user)
+	return updateOne(c, "user")
 }
 
 func deleteOneUser(c echo.Context) error {
-	return c.JSON(http.StatusOK, map[string]string{
-		"message": "success",
-	})
+	return deleteOne(c, "user")
 }
 
 func AdminCheck(next echo.HandlerFunc) echo.HandlerFunc {
